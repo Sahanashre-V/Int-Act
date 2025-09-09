@@ -53,7 +53,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-b from-[#FBF9D1] to-[#FBF9D1] text-[#9A3F3F]">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-b from-[#FFFFFF] to-[#FBF9D1] text-[#9A3F3F]">
       <div className="max-w-lg w-full">
         <Link 
           to="/" 

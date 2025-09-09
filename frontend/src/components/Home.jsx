@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 const Home = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-[#FBF9D1] to-[#FBF9D1] text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-b from-[#FFFFFF] to-[#FBF9D1] text-white">
       <div className="w-full max-w-4xl mx-auto text-center space-y-12">
         {/* Logo/Brand */}
         <motion.div
@@ -45,7 +45,7 @@ const Home = () => {
         </motion.div>
 
         {/* Message Box */}
-        <motion.div
+        {/* <motion.div
           className="w-full max-w-2xl mx-auto bg-white/20 backdrop-blur-xl rounded-full shadow-lg p-2 pl-6 flex items-center gap-3 border border-[#EF88AD]/40 hover:shadow-xl transition-all duration-300"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -59,7 +59,7 @@ const Home = () => {
           <button className="p-3.5 rounded-full bg-gradient-to-r from-[#9A3F3F] to-[#9A3F3F] hover:opacity-90 active:scale-95 text-white shadow-md transition-all duration-200">
             <Send size={20} />
           </button>
-        </motion.div>
+        </motion.div> */}
       </div>
     </div>
   );
