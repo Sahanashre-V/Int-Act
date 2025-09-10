@@ -5,7 +5,7 @@ const { generateToken } = require("../utils/token");
 
 const registerUser = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, role, ...extra } = req.body;
+    const { firstName, lastName, email, phoneNumber, password, role, ...extra } = req.body;
 
     if (!firstName || !lastName || !email || !password || !role) {
       return res.status(400).json({ message: "All fields are required" });
@@ -20,9 +20,9 @@ const registerUser = async (req, res) => {
 
     let user;
     if (role === "student") {
-      user = new Student({ firstName, lastName, email, password, role, ...extra });
+      user = new Student({ firstName, lastName, email, phoneNumber,password, role, ...extra });
     } else {
-      user = new Teacher({ firstName, lastName, email, password, role, ...extra });
+      user = new Teacher({ firstName, lastName, email, phoneNumber, password, role, ...extra });
     }
 
     await user.save();
