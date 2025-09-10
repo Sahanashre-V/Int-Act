@@ -3,8 +3,8 @@ const connectDB = require("./db/db")
 const dotenv = require("dotenv");
 dotenv.config();
 
-const userAuth = require("./routes/auth") 
-
+const userAuthRoute = require("./routes/authRoute") 
+const classRoute = require("./routes/classRoute");
 
 const app = express()
 connectDB()
@@ -15,7 +15,9 @@ app.use(express.json())
 
 const PORT = process.env.PORT || 5000;
 
-app.use("/api/auth",userAuth)
+app.use("/api/auth",userAuthRoute)
+app.use("/api/class",classRoute)
+
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)
