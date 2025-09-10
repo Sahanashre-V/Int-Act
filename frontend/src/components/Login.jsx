@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, ArrowLeft, Mail, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Login = () => {
+  const canvasRef = useRef(null);
+  const mouse = useRef({ x: null, y: null });
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
@@ -40,15 +42,93 @@ const Login = () => {
     }
   };
 
+  // Particle background effect
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particleCount = 100;
+    const particles = [];
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 3 + 1,
+        dx: (Math.random() - 0.5) * 1,
+        dy: (Math.random() - 0.5) * 1,
+      });
+    }
+
+    const handleMouseMove = (e) => {
+      mouse.current.x = e.x;
+      mouse.current.y = e.y;
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = '#9A3F3F';
+        ctx.fill();
+
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+
+        // Connect particle to mouse
+        if (mouse.current.x && mouse.current.y) {
+          const distX = p.x - mouse.current.x;
+          const distY = p.y - mouse.current.y;
+          const distance = Math.sqrt(distX * distX + distY * distY);
+
+          if (distance < 100) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(154,63,63,${1 - distance / 100})`;
+            ctx.lineWidth = 2;
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(mouse.current.x, mouse.current.y);
+            ctx.stroke();
+          }
+        }
+      });
+
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-b from-[#FFFFFF] to-[#FBF9D1] text-[#9A3F3F]">
-      <motion.div 
-        className="max-w-md w-full"
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white text-[#9A3F3F]">
+      {/* Particle Canvas */}
+      <canvas ref={canvasRef} className="absolute inset-0" />
+
+      {/* Login Form */}
+      <motion.div
+        className="relative z-10 max-w-md w-full"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        {/* Back to Home */}
         <Link 
           to="/" 
           className="inline-flex items-center gap-2 text-[#9A3F3F] hover:text-[#A53860] mb-8 transition-colors group"
@@ -57,7 +137,6 @@ const Login = () => {
           Back to Home
         </Link>
 
-        {/* Login Card */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-lg p-8 border border-[#EF88AD]/40 hover:shadow-2xl transition-shadow duration-300">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#9A3F3F] to-[#9A3F3F] rounded-full mb-4 shadow-md">
