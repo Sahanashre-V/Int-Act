@@ -1,11 +1,25 @@
 const User = require("../models/User");
 const Student = require("../models/Student");
 const Teacher = require("../models/Teacher");
+const Class = require("../models/Class");
+const Subject = require("../models/Subject")
+
 const { generateToken } = require("../utils/token");
 
 const registerUser = async (req, res) => {
   try {
-    const { firstName, lastName, email, phoneNumber, password, role, ...extra } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      password,
+      role,
+      class: classId,
+      classesHandling,
+      expertiseSubjects,
+      ...extra
+    } = req.body;
 
     if (!firstName || !lastName || !email || !password || !role) {
       return res.status(400).json({ message: "All fields are required" });
@@ -20,12 +34,49 @@ const registerUser = async (req, res) => {
 
     let user;
     if (role === "student") {
-      user = new Student({ firstName, lastName, email, phoneNumber,password, role, ...extra });
+      user = new Student({
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        password,
+        role,
+        class: classId,
+        ...extra,
+      });
     } else {
-      user = new Teacher({ firstName, lastName, email, phoneNumber, password, role, ...extra });
+      user = new Teacher({
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        password,
+        role,
+        classesHandling,
+        expertiseSubjects,
+        ...extra,
+      });
     }
 
     await user.save();
+
+    // 👉 Update related Class
+    if (role === "student" && classId) {
+      await Class.findByIdAndUpdate(classId, { $addToSet: { students: user._id } });
+    } else if (role === "teacher" && classesHandling?.length > 0) {
+      await Class.updateMany(
+        { _id: { $in: classesHandling } },
+        { $addToSet: { teachers: user._id } }
+      );
+    }
+
+    // 👉 Update related Subjects
+    if (role === "teacher" && expertiseSubjects?.length > 0) {
+      await Subject.updateMany(
+        { _id: { $in: expertiseSubjects } },
+        { $addToSet: { teachers: user._id } }
+      );
+    }
 
     const token = generateToken(user);
 
@@ -36,8 +87,8 @@ const registerUser = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (err) {
     console.error(err);
