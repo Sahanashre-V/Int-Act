@@ -4,8 +4,22 @@ meta {
   seq: 2
 }
 
-get {
-  url: http://localhost:8080/signup
-  body: none
+post {
+  url: http://localhost:8080/api/auth/signup
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "email": "alice@example.com",
+    "password": "mypassword123",
+    "role": "student",
+    "class": "64fa1234567890abcdef1234",
+    "cgpa": 8.7,
+    "ranking": 5
+  }
+  
 }

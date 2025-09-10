@@ -1,86 +1,105 @@
-const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const Student = require("../models/Student");
+const Teacher = require("../models/Teacher");
 const { generateToken } = require("../utils/token");
 
-exports.signup = async (req, res) => {
+const registerUser = async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, password, role } = req.body;
+    const { firstName, lastName, email, password, role, ...extra } = req.body;
 
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ msg: "Please fill all required fields" });
+    if (!firstName || !lastName || !email || !password || !role) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ msg: "Email already registered" });
+    if (!["student", "teacher"].includes(role)) {
+      return res.status(400).json({ message: "Role must be student or teacher" });
+    }
 
-    const hashed = await bcrypt.hash(password, 10);
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(409).json({ message: "Email already registered" });
 
-    const user = new User({
-      firstName,
-      lastName,
-      email,
-      phone,
-      password: hashed,
-      role: role || "student"
-    });
+    let user;
+    if (role === "student") {
+      user = new Student({ firstName, lastName, email, password, role, ...extra });
+    } else {
+      user = new Teacher({ firstName, lastName, email, password, role, ...extra });
+    }
+
     await user.save();
 
     const token = generateToken(user);
 
     res.status(201).json({
-      msg: "User created successfully",
       token,
       user: {
         id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        phone: user.phone,
         role: user.role
       }
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-exports.login = async (req, res) => {
+const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ msg: "Invalid credentials" });
+    if (!email || !password) return res.status(400).json({ message: "Email and password required" });
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ msg: "Invalid credentials" });
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
     const token = generateToken(user);
 
     res.json({
-      msg: "Login successful",
       token,
       user: {
         id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        phone: user.phone,
         role: user.role
       }
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-exports.getProfile = async (req, res) => {
+
+const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
-    if (!user) return res.status(404).json({ msg: "User not found" });
+    const user = await User.findById(req.user._id).select("-password");
 
-    res.json({ user });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      ...(user.role === "student" && { class: user.class, cgpa: user.cgpa, ranking: user.ranking }),
+      ...(user.role === "teacher" && { classesHandling: user.classesHandling, expertiseSubjects: user.expertiseSubjects }),
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
+
+module.exports = { registerUser, loginUser, getProfile };
