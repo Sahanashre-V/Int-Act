@@ -16,7 +16,8 @@ const Signup = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    agreeToTerms: false
+    agreeToTerms: false,
+    role: '' // NEW FIELD
   });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
@@ -41,15 +42,47 @@ const Signup = () => {
     if (!formData.confirmPassword) newErrors.confirmPassword = 'Confirm password';
     else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
     if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree';
+    if (!formData.role) newErrors.role = 'Please select a role';
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
+
     if (Object.keys(newErrors).length === 0) {
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      try {
+        // Call your backend signup API
+        const response = await fetch("http://localhost:8080/api/auth/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setSuccess(true);
+          setFormData({
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            password: '',
+            confirmPassword: '',
+            agreeToTerms: false,
+            role: ''
+          });
+          setTimeout(() => setSuccess(false), 3000);
+        } else {
+          alert(data.message || "Signup failed. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Something went wrong. Please check your backend connection.");
+      }
     } else {
       setErrors(newErrors);
     }
@@ -252,6 +285,41 @@ const Signup = () => {
                   </div>
                 </div>
 
+                {/* Role Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-[#9A3F3F] mb-2">Role</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <label className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition 
+                      ${formData.role === 'student' ? 'border-[#9A3F3F] bg-[#9A3F3F]/10' : 'border-gray-300'}`}>
+                      <input
+                        type="radio"
+                        name="role"
+                        value="student"
+                        checked={formData.role === 'student'}
+                        onChange={handleInputChange}
+                        className="hidden"
+                      />
+                      <User className="text-[#9A3F3F]" size={20} />
+                      <span>Student</span>
+                    </label>
+
+                    <label className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition 
+                      ${formData.role === 'teacher' ? 'border-[#9A3F3F] bg-[#9A3F3F]/10' : 'border-gray-300'}`}>
+                      <input
+                        type="radio"
+                        name="role"
+                        value="teacher"
+                        checked={formData.role === 'teacher'}
+                        onChange={handleInputChange}
+                        className="hidden"
+                      />
+                      <User className="text-[#9A3F3F]" size={20} />
+                      <span>Teacher</span>
+                    </label>
+                  </div>
+                  {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role}</p>}
+                </div>
+
                 {/* Passwords */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -325,22 +393,19 @@ const Signup = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
-                  className="w-full bg-gradient-to-r from-[#9A3F3F] to-[#9A3F3F] text-white font-semibold py-3 px-4 rounded-2xl shadow-lg hover:shadow-2xl transition-all"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-[#9A3F3F] to-[#A53860] text-white rounded-xl shadow-md hover:shadow-lg transition duration-300 font-semibold"
                 >
                   Create Account
                 </motion.button>
+
+                {/* Login Link */}
+                <p className="text-center text-[#9A3F3F]/80 mt-4">
+                  Already have an account?{' '}
+                  <Link to="/login" className="text-[#9A3F3F] font-semibold hover:underline">Login</Link>
+                </p>
               </motion.form>
             )}
           </AnimatePresence>
-
-          <div className="text-center mt-6 pt-6 border-t border-[#EF88AD]/40">
-            <p className="text-[#9A3F3F]/80">
-              Already have an account?{' '}
-              <Link to="/login" className="text-[#9A3F3F] hover:text-[#9A3F3F] font-semibold transition-colors">
-                Sign in here
-              </Link>
-            </p>
-          </div>
         </motion.div>
       </div>
     </div>
