@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, ArrowLeft, Mail, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 const Login = () => {
   const canvasRef = useRef(null);
@@ -9,6 +10,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -31,18 +33,32 @@ const Login = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
+
     if (Object.keys(newErrors).length === 0) {
-      console.log('Login attempt:', formData);
-      alert('Login successful! (This is a demo)');
+      try {
+        const res = await axios.post("http://localhost:8080/api/auth/login", formData);
+
+     
+        localStorage.setItem("token", res.data.token);
+
+        alert("Login successful!");
+
+  
+        navigate("/profile");
+
+      } catch (err) {
+        console.error("Login failed:", err.response?.data || err.message);
+        setErrors({ email: "Invalid email or password" });
+      }
     } else {
       setErrors(newErrors);
     }
   };
 
-  // Particle background effect
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -83,7 +99,6 @@ const Login = () => {
         if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
         if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
 
-        // Connect particle to mouse
         if (mouse.current.x && mouse.current.y) {
           const distX = p.x - mouse.current.x;
           const distY = p.y - mouse.current.y;
@@ -119,10 +134,8 @@ const Login = () => {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white text-[#9A3F3F]">
-      {/* Particle Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0" />
 
-      {/* Login Form */}
       <motion.div
         className="relative z-10 max-w-md w-full"
         initial={{ opacity: 0, y: 40 }}
@@ -204,23 +217,6 @@ const Login = () => {
                 </button>
               </div>
               {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-            </div>
-
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 text-[#9A3F3F] border-2 border-[#9A3F3F] rounded focus:ring-[#9A3F3F] focus:ring-2 bg-transparent"
-                />
-                <span className="ml-2 text-[#9A3F3F]/80">Remember me</span>
-              </label>
-              <button
-                type="button"
-                className="text-[#9A3F3F] hover:text-[#9A3F3F] transition-colors"
-              >
-                Forgot password?
-              </button>
             </div>
 
             {/* Submit Button */}
