@@ -2,9 +2,7 @@ const Quiz = require("../models/Quiz");
 const Class = require("../models/Class");
 const Subject = require("../models/Subject");
 
-// @desc Create a new quiz
-// @route POST /api/quizzes
-// @access Teacher
+
 const createQuiz = async (req, res) => {
   try {
     const { title, subject, class: classId, questions, timeLimit, dueDate } = req.body;
@@ -13,7 +11,6 @@ const createQuiz = async (req, res) => {
       return res.status(400).json({ message: "Title, subject, class, and questions are required" });
     }
 
-    // Ensure subject and class exist
     const subjectExists = await Subject.findById(subject);
     if (!subjectExists) return res.status(404).json({ message: "Subject not found" });
 
@@ -36,9 +33,7 @@ const createQuiz = async (req, res) => {
   }
 };
 
-// @desc Get all quizzes
-// @route GET /api/quizzes
-// @access Public (students/teachers)
+
 const getQuizzes = async (req, res) => {
   try {
     const quizzes = await Quiz.find()
@@ -52,9 +47,7 @@ const getQuizzes = async (req, res) => {
   }
 };
 
-// @desc Get quiz by ID
-// @route GET /api/quizzes/:id
-// @access Public
+
 const getQuizById = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id)
@@ -72,45 +65,53 @@ const getQuizById = async (req, res) => {
   }
 };
 
-// @desc Submit quiz attempt
-// @route POST /api/quizzes/:id/submit
-// @access Student
 const submitQuiz = async (req, res) => {
   try {
-    const { answers } = req.body; // [{questionIndex: 0, selectedOption: 1}]
-    const quiz = await Quiz.findById(req.params.id);
+    const { answers } = req.body; 
 
-    if (!quiz) {
-      return res.status(404).json({ message: "Quiz not found" });
-    }
+    const quiz = await Quiz.findById(req.params.id);
+    if (!quiz) return res.status(404).json({ message: "Quiz not found" });
 
     let score = 0;
+    const processedAnswers = [];
 
     quiz.questions.forEach((q, idx) => {
       const studentAnswer = answers.find((a) => a.questionIndex === idx);
       if (studentAnswer) {
-        const selectedOption = q.options[studentAnswer.selectedOption];
-        if (selectedOption && selectedOption.isCorrect) {
-          score++;
-        }
+        const selected = q.options[studentAnswer.selectedOption];
+        const correct = selected ? selected.isCorrect : false;
+
+        if (correct) score++;
+
+        processedAnswers.push({
+          questionIndex: idx,
+          selectedOption: studentAnswer.selectedOption,
+          isCorrect: correct,
+        });
       }
     });
 
-    // Record attempt
     quiz.attempts.push({
       student: req.user._id,
       score,
       submittedAt: new Date(),
+      answers: processedAnswers,
     });
 
     await quiz.save();
 
-    res.json({ message: "Quiz submitted", score, total: quiz.questions.length });
+    res.json({
+      message: "Quiz submitted",
+      score,
+      total: quiz.questions.length,
+      answers: processedAnswers,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 module.exports = {
   createQuiz,
