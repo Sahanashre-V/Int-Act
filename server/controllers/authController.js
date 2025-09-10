@@ -4,16 +4,41 @@ const { generateToken } = require("../utils/token");
 
 exports.signup = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { firstName, lastName, email, phone, password, role } = req.body;
+
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ msg: "Please fill all required fields" });
+    }
 
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ msg: "Email already registered" });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashed, role });
+
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      phone,
+      password: hashed,
+      role: role || "student"
+    });
     await user.save();
 
-    res.status(201).json({ msg: "User created", user: { id: user._id, email, role } });
+    const token = generateToken(user);
+
+    res.status(201).json({
+      msg: "User created successfully",
+      token,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -30,12 +55,23 @@ exports.login = async (req, res) => {
     if (!match) return res.status(400).json({ msg: "Invalid credentials" });
 
     const token = generateToken(user);
-    res.json({ token });
+
+    res.json({
+      msg: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 exports.getProfile = async (req, res) => {
   try {
@@ -47,3 +83,4 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
