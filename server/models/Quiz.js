@@ -36,6 +36,14 @@ const quizSchema = new mongoose.Schema(
         student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         score: { type: Number, default: 0 },
         submittedAt: { type: Date, default: Date.now },
+        answers: [
+      {
+        questionIndex: Number,
+        selectedOption: Number,
+        isCorrect: Boolean
+      }
+    ]
+
       },
     ],
   },
