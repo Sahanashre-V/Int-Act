@@ -1,6 +1,7 @@
 const express = require("express");
 const connectDB = require("./db/db")
 const dotenv = require("dotenv");
+const cors = require("cors")
 dotenv.config();
 
 const userAuthRoute = require("./routes/authRoute") 
@@ -10,6 +11,8 @@ const quizRoute = require("./routes/quizRoute")
 
 const app = express()
 connectDB()
+ 
+app.use(cors())
 
 app.use(express.json())
 

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, UserCog } from "lucide-react";
 
-const Landing = () => {
+const Chat = () => {
   const [searchText, setSearchText] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -108,4 +108,4 @@ const Landing = () => {
   );
 };
 
-export default Landing;
+export default Chat;
