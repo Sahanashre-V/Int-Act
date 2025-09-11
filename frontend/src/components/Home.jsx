@@ -124,6 +124,19 @@ const Home = () => {
             Create Account
           </Link>
         </motion.div>
+        <motion.div
+          className="mt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        >
+          <Link
+            to="/about"
+            className="text-[#9A3F3F] underline font-medium text-lg hover:text-[#7e2f2f] transition-colors"
+          >
+            Know more about us
+          </Link>
+        </motion.div>
       </div>
     </div>
   );
