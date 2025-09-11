@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff, UserPlus, ArrowLeft, Mail, Lock, User, Phone, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Mail, Lock, User, Phone, CheckCircle2, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Signup = () => {
@@ -14,19 +14,20 @@ const Signup = () => {
     lastName: '',
     email: '',
     phone: '',
+    className: '',
     password: '',
     confirmPassword: '',
     agreeToTerms: false,
-    role: '' // NEW FIELD
+    role: ''
   });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
     }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
@@ -43,6 +44,7 @@ const Signup = () => {
     else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
     if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree';
     if (!formData.role) newErrors.role = 'Please select a role';
+    if (!formData.className) newErrors.className = 'Please select a class';
     return newErrors;
   };
 
@@ -52,7 +54,6 @@ const Signup = () => {
 
     if (Object.keys(newErrors).length === 0) {
       try {
-        // Call your backend signup API
         const response = await fetch("http://localhost:8080/api/auth/signup", {
           method: "POST",
           headers: {
@@ -70,6 +71,7 @@ const Signup = () => {
             lastName: '',
             email: '',
             phone: '',
+            className: '',
             password: '',
             confirmPassword: '',
             agreeToTerms: false,
@@ -88,7 +90,6 @@ const Signup = () => {
     }
   };
 
-  // Particle background
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -167,113 +168,155 @@ const Signup = () => {
       <canvas ref={canvasRef} className="absolute inset-0" />
 
       <div className="relative z-10 max-w-lg w-full">
-        <Link 
-          to="/" 
-          className="inline-flex items-center gap-2 text-[#9A3F3F] hover:text-[#A53860] mb-8 transition-colors group"
-        >
-          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-          Back to Home
-        </Link>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }} 
-          animate={{ opacity: 1, y: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="bg-white/10 backdrop-blur-md rounded-2xl shadow-lg p-8 border border-[#EF88AD]/40 hover:shadow-2xl transition-shadow duration-300"
         >
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#9A3F3F] to-[#9A3F3F] rounded-full mb-4 shadow-md">
-              <UserPlus size={32} className="text-white" />
-            </div>
-            <h2 className="text-3xl font-bold text-[#9A3F3F] mb-2">Create Account</h2>
+            <h2 className="text-3xl font-bold text-[#9A3F3F] mb-2">
+              Create Account
+            </h2>
             <p className="text-[#9A3F3F]/80">Join us today and get started</p>
           </div>
 
           <AnimatePresence>
             {success ? (
-              <motion.div 
+              <motion.div
                 key="success"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 className="flex flex-col items-center justify-center py-12"
               >
-                <CheckCircle2 size={80} className="text-[#EF88AD] drop-shadow-lg animate-pulse" />
-                <p className="text-[#9A3F3F] font-semibold mt-4">Account created successfully!</p>
+                <CheckCircle2
+                  size={80}
+                  className="text-[#EF88AD] drop-shadow-lg animate-pulse"
+                />
+                <p className="text-[#9A3F3F] font-semibold mt-4">
+                  Account created successfully!
+                </p>
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-2 text-[#9A3F3F] hover:text-[#A53860] mt-4 transition-colors group"
+                >
+                  <ArrowLeft
+                    size={20}
+                    className="group-hover:-translate-x-1 transition-transform"
+                  />
+                  Back to Home
+                </Link>
               </motion.div>
             ) : (
-              <motion.form 
+              <motion.form
                 key="form"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.4 }}
-                onSubmit={handleSubmit} 
+                onSubmit={handleSubmit}
                 className="space-y-6"
               >
                 {/* Name Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-[#9A3F3F] mb-2">First Name</label>
+                    <label className="block text-sm font-medium text-[#9A3F3F] mb-2">
+                      First Name
+                    </label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60" size={20} />
+                      <User
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60"
+                        size={20}
+                      />
                       <input
                         type="text"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
                         className={`w-full pl-10 pr-4 py-3 rounded-xl bg-transparent text-black placeholder-black/60 border-2 ${
-                          errors.firstName ? 'border-red-400 focus:border-red-500' : 'border-[#9A3F3F] focus:border-[#9A3F3F]'
+                          errors.firstName
+                            ? "border-red-400 focus:border-red-500"
+                            : "border-[#9A3F3F] focus:border-[#9A3F3F]"
                         } focus:outline-none`}
                         placeholder="First name"
                       />
                     </div>
-                    {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
+                    {errors.firstName && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.firstName}
+                      </p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#9A3F3F] mb-2">Last Name</label>
+                    <label className="block text-sm font-medium text-[#9A3F3F] mb-2">
+                      Last Name
+                    </label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60" size={20} />
+                      <User
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60"
+                        size={20}
+                      />
                       <input
                         type="text"
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange}
                         className={`w-full pl-10 pr-4 py-3 rounded-xl bg-transparent text-black placeholder-black/60 border-2 ${
-                          errors.lastName ? 'border-red-400 focus:border-red-500' : 'border-[#9A3F3F] focus:border-[#9A3F3F]'
+                          errors.lastName
+                            ? "border-red-400 focus:border-red-500"
+                            : "border-[#9A3F3F] focus:border-[#9A3F3F]"
                         } focus:outline-none`}
                         placeholder="Last name"
                       />
                     </div>
-                    {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
+                    {errors.lastName && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.lastName}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-medium text-[#9A3F3F] mb-2">Email</label>
+                  <label className="block text-sm font-medium text-[#9A3F3F] mb-2">
+                    Email
+                  </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60" size={20} />
+                    <Mail
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60"
+                      size={20}
+                    />
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
                       className={`w-full pl-10 pr-4 py-3 rounded-xl bg-transparent text-black placeholder-black/60 border-2 ${
-                        errors.email ? 'border-red-400 focus:border-red-500' : 'border-[#9A3F3F] focus:border-[#9A3F3F]'
+                        errors.email
+                          ? "border-red-400 focus:border-red-500"
+                          : "border-[#9A3F3F] focus:border-[#9A3F3F]"
                       } focus:outline-none`}
                       placeholder="Enter your email"
                     />
                   </div>
-                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
                 </div>
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-sm font-medium text-[#9A3F3F] mb-2">Phone (optional)</label>
+                  <label className="block text-sm font-medium text-[#9A3F3F] mb-2">
+                    Phone
+                  </label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60" size={20} />
+                    <Phone
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60"
+                      size={20}
+                    />
                     <input
                       type="tel"
                       name="phone"
@@ -285,17 +328,59 @@ const Signup = () => {
                   </div>
                 </div>
 
+                {/* Class Dropdown */}
+                <div>
+                  <label className="block text-sm font-medium text-[#9A3F3F] mb-2">
+                    Class
+                  </label>
+                  <select
+                    name="className"
+                    value={formData.className}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 rounded-xl bg-transparent border-2 ${
+                      errors.className
+                        ? "border-red-400 focus:border-red-500"
+                        : "border-[#9A3F3F] focus:border-[#9A3F3F]"
+                    } focus:outline-none ${
+                      formData.className === "" ? "text-gray-400" : "text-black"
+                    }`}
+                  >
+                    <option value="" disabled hidden>
+                      Select your class
+                    </option>
+                    <option value="Class 6">Class 6</option>
+                    <option value="Class 7">Class 7</option>
+                    <option value="Class 8">Class 8</option>
+                    <option value="Class 9">Class 9</option>
+                    <option value="Class 10">Class 10</option>
+                    <option value="Class 11">Class 11</option>
+                    <option value="Class 12">Class 12</option>
+                  </select>
+                  {errors.className && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.className}
+                    </p>
+                  )}
+                </div>
+
                 {/* Role Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-[#9A3F3F] mb-2">Role</label>
+                  <label className="block text-sm font-medium text-[#9A3F3F] mb-2">
+                    Role
+                  </label>
                   <div className="grid grid-cols-2 gap-4">
-                    <label className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition 
-                      ${formData.role === 'student' ? 'border-[#9A3F3F] bg-[#9A3F3F]/10' : 'border-gray-300'}`}>
+                    <label
+                      className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition ${
+                        formData.role === "student"
+                          ? "border-[#9A3F3F] bg-[#9A3F3F]/10"
+                          : "border-gray-300"
+                      }`}
+                    >
                       <input
                         type="radio"
                         name="role"
                         value="student"
-                        checked={formData.role === 'student'}
+                        checked={formData.role === "student"}
                         onChange={handleInputChange}
                         className="hidden"
                       />
@@ -303,13 +388,18 @@ const Signup = () => {
                       <span>Student</span>
                     </label>
 
-                    <label className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition 
-                      ${formData.role === 'teacher' ? 'border-[#9A3F3F] bg-[#9A3F3F]/10' : 'border-gray-300'}`}>
+                    <label
+                      className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition ${
+                        formData.role === "teacher"
+                          ? "border-[#9A3F3F] bg-[#9A3F3F]/10"
+                          : "border-gray-300"
+                      }`}
+                    >
                       <input
                         type="radio"
                         name="role"
                         value="teacher"
-                        checked={formData.role === 'teacher'}
+                        checked={formData.role === "teacher"}
                         onChange={handleInputChange}
                         className="hidden"
                       />
@@ -317,22 +407,31 @@ const Signup = () => {
                       <span>Teacher</span>
                     </label>
                   </div>
-                  {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role}</p>}
+                  {errors.role && (
+                    <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+                  )}
                 </div>
 
                 {/* Passwords */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-[#9A3F3F] mb-2">Password</label>
+                    <label className="block text-sm font-medium text-[#9A3F3F] mb-2">
+                      Password
+                    </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60" size={20} />
+                      <Lock
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60"
+                        size={20}
+                      />
                       <input
-                        type={showPassword ? 'text' : 'password'}
+                        type={showPassword ? "text" : "password"}
                         name="password"
                         value={formData.password}
                         onChange={handleInputChange}
                         className={`w-full pl-10 pr-12 py-3 rounded-xl bg-transparent text-black placeholder-black/60 border-2 ${
-                          errors.password ? 'border-red-400 focus:border-red-500' : 'border-[#9A3F3F] focus:border-[#9A3F3F]'
+                          errors.password
+                            ? "border-red-400 focus:border-red-500"
+                            : "border-[#9A3F3F] focus:border-[#9A3F3F]"
                         } focus:outline-none`}
                         placeholder="Create password"
                       />
@@ -341,54 +440,69 @@ const Signup = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60 hover:text-[#9A3F3F]"
                       >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        {showPassword ? (
+                          <EyeOff size={20} />
+                        ) : (
+                          <Eye size={20} />
+                        )}
                       </button>
                     </div>
-                    {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                    {errors.password && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.password}
+                      </p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#9A3F3F] mb-2">Confirm Password</label>
+                    <label className="block text-sm font-medium text-[#9A3F3F] mb-2">
+                      Confirm Password
+                    </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60" size={20} />
+                      <Lock
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60"
+                        size={20}
+                      />
                       <input
-                        type={showConfirmPassword ? 'text' : 'password'}
+                        type={showConfirmPassword ? "text" : "password"}
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
                         className={`w-full pl-10 pr-12 py-3 rounded-xl bg-transparent text-black placeholder-black/60 border-2 ${
-                          errors.confirmPassword ? 'border-red-400 focus:border-red-500' : 'border-[#9A3F3F] focus:border-[#9A3F3F]'
+                          errors.confirmPassword
+                            ? "border-red-400 focus:border-red-500"
+                            : "border-[#9A3F3F] focus:border-[#9A3F3F]"
                         } focus:outline-none`}
                         placeholder="Confirm password"
                       />
                       <button
                         type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A3F3F]/60 hover:text-[#9A3F3F]"
                       >
-                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        {showConfirmPassword ? (
+                          <EyeOff size={20} />
+                        ) : (
+                          <Eye size={20} />
+                        )}
                       </button>
                     </div>
-                    {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+                    {errors.confirmPassword && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.confirmPassword}
+                      </p>
+                    )}
                   </div>
                 </div>
+                {errors.agreeToTerms && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.agreeToTerms}
+                  </p>
+                )}
 
-                {/* Terms */}
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    name="agreeToTerms"
-                    checked={formData.agreeToTerms}
-                    onChange={handleInputChange}
-                    className="mt-1 w-4 h-4 text-[#9A3F3F] border-2 border-[#9A3F3F] rounded focus:ring-[#9A3F3F] focus:ring-2"
-                  />
-                  <span className="text-sm text-[#9A3F3F]/80">
-                    I agree to the <button type="button" className="text-[#9A3F3F] hover:underline font-semibold">Terms</button> and <button type="button" className="text-[#9A3F3F] font-semibold hover:underline">Privacy Policy</button>
-                  </span>
-                </div>
-                {errors.agreeToTerms && <p className="text-red-500 text-sm mt-1">{errors.agreeToTerms}</p>}
-
-                {/* Submit Button */}
+                {/* Submit */}
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -398,10 +512,27 @@ const Signup = () => {
                   Create Account
                 </motion.button>
 
+                {/* Back to Home Link */}
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-2 text-[#9A3F3F] hover:text-[#A53860] mt-4 transition-colors group justify-center w-full text-center"
+                >
+                  <ArrowLeft
+                    size={20}
+                    className="group-hover:-translate-x-1 transition-transform"
+                  />
+                  Back to Home
+                </Link>
+
                 {/* Login Link */}
-                <p className="text-center text-[#9A3F3F]/80 mt-4">
-                  Already have an account?{' '}
-                  <Link to="/login" className="text-[#9A3F3F] font-semibold hover:underline">Login</Link>
+                <p className="text-center text-[#9A3F3F]/80 mt-2">
+                  Already have an account?{" "}
+                  <Link
+                    to="/login"
+                    className="text-[#9A3F3F] font-semibold hover:underline"
+                  >
+                    Login
+                  </Link>
                 </p>
               </motion.form>
             )}
