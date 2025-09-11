@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, User, Phone, CheckCircle2, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Signup = () => {
   const canvasRef = useRef(null);
+  const navigate = useNavigate();
   const mouse = useRef({ x: null, y: null });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -42,7 +43,7 @@ const Signup = () => {
     else if (formData.password.length < 8) newErrors.password = 'At least 8 characters';
     if (!formData.confirmPassword) newErrors.confirmPassword = 'Confirm password';
     else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree';
+    // if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree';
     if (!formData.role) newErrors.role = 'Please select a role';
     if (!formData.className) newErrors.className = 'Please select a class';
     return newErrors;
@@ -56,9 +57,7 @@ const Signup = () => {
       try {
         const response = await fetch("http://localhost:8080/api/auth/signup", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         });
 
@@ -77,7 +76,12 @@ const Signup = () => {
             agreeToTerms: false,
             role: ''
           });
-          setTimeout(() => setSuccess(false), 3000);
+
+          // redirect to chat page after 1 second
+          setTimeout(() => {
+            navigate("/Chat");  // ⬅️ go to chat page
+          }, 1000);
+
         } else {
           alert(data.message || "Signup failed. Please try again.");
         }
@@ -496,11 +500,11 @@ const Signup = () => {
                     )}
                   </div>
                 </div>
-                {errors.agreeToTerms && (
+                {/* {errors.agreeToTerms && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.agreeToTerms}
                   </p>
-                )}
+                )} */}
 
                 {/* Submit */}
                 <motion.button
