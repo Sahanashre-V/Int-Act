@@ -4,7 +4,6 @@ import Home from './components/Home';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import About from './components/About';
-import chat from './components/Chat';
 import Chat from './components/Chat';
 
 function App() {
